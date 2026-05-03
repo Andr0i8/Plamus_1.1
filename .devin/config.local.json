@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Exec(flutter analyze)",
+      "Exec(flutter pub)",
+      "Exec(flutter clean)",
+      "Exec(flutter build)",
+      "Exec(unzip)",
+      "Exec(./gradlew)",
+      "Exec(rm)",
+      "Exec(ls)",
+      "Exec(grep)",
+      "Exec(wc)",
+      "Exec(find)",
+      "Exec(flutter test)",
+      "Exec(flutter devices)",
+      "Exec(python3)",
+      "Exec(flutter)",
+      "Exec(pacman)",
+      "Exec(mkdir)",
+      "Exec(cat)",
+      "Exec(adb logcat)",
+      "Exec(adb devices)",
+      "Exec(adb shell)"
+    ]
+  }
+}
