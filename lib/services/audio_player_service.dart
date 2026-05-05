@@ -80,8 +80,32 @@ class AudioPlayerService extends ChangeNotifier {
   /// Flag to prevent recursive pause calls
   bool _isHandlingIndexChange = false;
 
+  /// One-shot sleep timer that pauses playback when it expires.
+  Timer? _sleepTimer;
+
+  /// Wall-clock expiration for [_sleepTimer], used by the UI to show
+  /// remaining time without persisting anything between app launches.
+  DateTime? _sleepTimerEndsAt;
+
+  /// Guards async timer callbacks from notifying after service disposal.
+  bool _disposed = false;
+
   /// The active queue (unmodifiable view).
   List<TrackModel> get queue => List.unmodifiable(_queue);
+
+  /// Whether a one-shot sleep timer is currently active.
+  bool get sleepTimerActive => _sleepTimerEndsAt != null;
+
+  /// Wall-clock time when the active sleep timer will fire, or null.
+  DateTime? get sleepTimerEndsAt => _sleepTimerEndsAt;
+
+  /// Remaining sleep timer duration, clamped to zero when inactive/expired.
+  Duration get sleepTimerRemaining {
+    final endsAt = _sleepTimerEndsAt;
+    if (endsAt == null) return Duration.zero;
+    final remaining = endsAt.difference(DateTime.now());
+    return remaining.isNegative ? Duration.zero : remaining;
+  }
 
   // ============================================================================
   // REACTIVE STREAMS - SINGLE SOURCE OF TRUTH
@@ -90,7 +114,10 @@ class AudioPlayerService extends ChangeNotifier {
   /// Stream of the currently playing track (reactive).
   Stream<TrackModel?> get currentTrackStream {
     return _player.currentIndexStream.map((index) {
-      if (index == null || _queue.isEmpty || index < 0 || index >= _queue.length) {
+      if (index == null ||
+          _queue.isEmpty ||
+          index < 0 ||
+          index >= _queue.length) {
         return null;
       }
       return _queue[index];
@@ -127,7 +154,9 @@ class AudioPlayerService extends ChangeNotifier {
   TrackModel? get currentTrack {
     if (_queue.isEmpty) return null;
     final actualIndex = _player.currentIndex;
-    if (actualIndex == null || actualIndex < 0 || actualIndex >= _queue.length) {
+    if (actualIndex == null ||
+        actualIndex < 0 ||
+        actualIndex >= _queue.length) {
       return null;
     }
     return _queue[actualIndex];
@@ -146,8 +175,8 @@ class AudioPlayerService extends ChangeNotifier {
   bool get isReady {
     final state = _player.processingState;
     return state == ja.ProcessingState.ready ||
-           state == ja.ProcessingState.buffering ||
-           state == ja.ProcessingState.loading;
+        state == ja.ProcessingState.buffering ||
+        state == ja.ProcessingState.loading;
   }
 
   /// Configures session category and wires player streams.
@@ -186,8 +215,7 @@ class AudioPlayerService extends ChangeNotifier {
             _lastKnownIndex! >= 0 &&
             _lastKnownIndex! < _queue.length) {
           final outgoing = _queue[_lastKnownIndex!];
-          if (_playHistory.isEmpty ||
-              _playHistory.last.id != outgoing.id) {
+          if (_playHistory.isEmpty || _playHistory.last.id != outgoing.id) {
             _playHistory.add(outgoing);
           }
 
@@ -212,7 +240,8 @@ class AudioPlayerService extends ChangeNotifier {
             index != _lastKnownIndex &&
             repeatMode == RepeatMode.off) {
           _isHandlingIndexChange = true;
-          debugPrint('AudioPlayerService: Auto-advance detected ($_lastKnownIndex -> $index) with repeat OFF - STOPPING');
+          debugPrint(
+              'AudioPlayerService: Auto-advance detected ($_lastKnownIndex -> $index) with repeat OFF - STOPPING');
 
           // Pause immediately and go back to the previous track
           _player.pause().then((_) {
@@ -230,7 +259,8 @@ class AudioPlayerService extends ChangeNotifier {
       // When track completes and repeat is OFF, stop playback completely
       if (state.processingState == ja.ProcessingState.completed &&
           repeatMode == RepeatMode.off) {
-        debugPrint('AudioPlayerService: Track completed with repeat OFF - stopping playback');
+        debugPrint(
+            'AudioPlayerService: Track completed with repeat OFF - stopping playback');
         _player.pause();
         _player.seek(Duration.zero);
       }
@@ -319,9 +349,8 @@ class AudioPlayerService extends ChangeNotifier {
           album: 'Library',
           title: t.title,
           artist: t.artist,
-          duration: t.durationMs > 0
-              ? Duration(milliseconds: t.durationMs)
-              : null,
+          duration:
+              t.durationMs > 0 ? Duration(milliseconds: t.durationMs) : null,
         );
 
         // CRITICAL: Only attach the tag on mobile to avoid sequence
@@ -377,9 +406,7 @@ class AudioPlayerService extends ChangeNotifier {
         _playbackContextId == null ||
         _playbackContextId == contextId;
 
-    if (current?.id != null &&
-        current?.id == clickedTrack.id &&
-        sameContext) {
+    if (current?.id != null && current?.id == clickedTrack.id && sameContext) {
       if (playing) {
         await pause();
       } else {
@@ -409,7 +436,51 @@ class AudioPlayerService extends ChangeNotifier {
     _playHistory.clear();
     _lastKnownIndex = null;
     _playbackContextId = null;
+    _clearSleepTimer(notify: false);
     notifyListeners();
+  }
+
+  /// Starts/replaces the one-shot sleep timer.
+  ///
+  /// When the timer expires playback is paused in place (the queue and
+  /// position are preserved) and the timer state is cleared.
+  void setSleepTimer(Duration duration) {
+    if (duration <= Duration.zero) {
+      throw ArgumentError.value(
+        duration,
+        'duration',
+        'Sleep timer duration must be positive',
+      );
+    }
+
+    _sleepTimer?.cancel();
+    _sleepTimerEndsAt = DateTime.now().add(duration);
+    _sleepTimer = Timer(duration, () {
+      unawaited(_handleSleepTimerExpired());
+    });
+    notifyListeners();
+  }
+
+  /// Cancels the active sleep timer, if any.
+  void cancelSleepTimer() {
+    _clearSleepTimer();
+  }
+
+  Future<void> _handleSleepTimerExpired() async {
+    try {
+      await _player.pause();
+    } catch (e) {
+      debugPrint('AudioPlayerService: sleep timer pause failed: $e');
+    } finally {
+      _clearSleepTimer();
+    }
+  }
+
+  void _clearSleepTimer({bool notify = true}) {
+    _sleepTimer?.cancel();
+    _sleepTimer = null;
+    _sleepTimerEndsAt = null;
+    if (notify && !_disposed) notifyListeners();
   }
 
   /// Updates repeat mode with IMMEDIATE effect and UI update.
@@ -633,14 +704,17 @@ class AudioPlayerService extends ChangeNotifier {
     }
 
     if (isLastTrack) {
-      if (repeatMode == RepeatMode.all && _shuffleEnabled && _queue.length > 1) {
+      if (repeatMode == RepeatMode.all &&
+          _shuffleEnabled &&
+          _queue.length > 1) {
         // End of shuffled queue + repeat-all: regenerate fresh random
         // order and start it from the top.
         await _reshuffleAndRestart();
         return;
       }
       if (repeatMode == RepeatMode.off) {
-        debugPrint('AudioPlayerService: At last track with repeat OFF - not advancing');
+        debugPrint(
+            'AudioPlayerService: At last track with repeat OFF - not advancing');
         return;
       }
       // Repeat-all (non-shuffle): just-audio's seekToNext handles the
@@ -740,6 +814,8 @@ class AudioPlayerService extends ChangeNotifier {
   @override
   void dispose() {
     // Stop playback and clear all streams immediately
+    _disposed = true;
+    _sleepTimer?.cancel();
     _player.stop();
     _player.dispose();
     super.dispose();

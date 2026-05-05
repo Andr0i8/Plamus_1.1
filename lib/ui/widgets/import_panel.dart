@@ -279,6 +279,7 @@ class _ImportPanelState extends State<ImportPanel> {
         outputPath,
         artist: remoteArtist,
         title: remoteTitle,
+        sourceUrl: AudioDownloadService.isYouTubeUrl(url) ? url : null,
         inLibrary: widget.addToLibrary,
       );
       await lib.refreshAll();
@@ -420,10 +421,9 @@ class _ImportPanelState extends State<ImportPanel> {
     // Pick the section for the current tab. Wrapped in [Expanded] when
     // [widget.fillHeight] is true so the panel fills the parent instead of
     // forcing an outer scroll view (BUG 4).
-    final Widget tabSection =
-        (_mode == _ImportMode.link || !_supportsSearch)
-            ? _buildLinkSection(theme, isMobile: isMobile)
-            : _buildSearchSection(theme);
+    final Widget tabSection = (_mode == _ImportMode.link || !_supportsSearch)
+        ? _buildLinkSection(theme, isMobile: isMobile)
+        : _buildSearchSection(theme);
     final wrappedTabSection =
         widget.fillHeight ? Expanded(child: tabSection) : tabSection;
 
@@ -787,8 +787,7 @@ class _SearchResultTile extends StatelessWidget {
       if (result.channel.isNotEmpty) result.channel,
       if (metaLabel.isNotEmpty) metaLabel,
     ].join(' \u00b7 ');
-    final trailingIcon =
-        result.isPlaylist ? Icons.queue_music : Icons.download;
+    final trailingIcon = result.isPlaylist ? Icons.queue_music : Icons.download;
     // Tag rendered on top of the thumbnail so playlists are visually
     // distinct at a glance even before you read the subtitle.
     return InkWell(
@@ -818,8 +817,7 @@ class _SearchResultTile extends StatelessWidget {
                             child: SizedBox(
                               width: 16,
                               height: 16,
-                              child:
-                                  CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             ),
                           ),
                         );

@@ -35,6 +35,9 @@ class LibraryService extends ChangeNotifier {
   /// when provided — useful when a YouTube extractor returned the original
   /// video title via `X-Track-Title`.
   ///
+  /// [sourceUrl] stores the original YouTube URL for later sharing. Leave it
+  /// null for local files and non-YouTube direct audio links.
+  ///
   /// [inLibrary] controls whether the new row is visible in the main
   /// library list. Pass `false` when importing directly into a playlist so
   /// the track only appears in that playlist (BUG 6). When the file is
@@ -44,6 +47,7 @@ class LibraryService extends ChangeNotifier {
     String filePath, {
     String? artist,
     String? title,
+    String? sourceUrl,
     bool inLibrary = true,
   }) async {
     final f = File(filePath);
@@ -51,15 +55,29 @@ class LibraryService extends ChangeNotifier {
       throw FileSystemException('Cannot register missing file', filePath);
     }
     final sqlite = await _db.database;
+    final normalizedSourceUrl = _normalizeOptionalUrl(sourceUrl);
     final existing = await sqlite.query(
       'tracks',
-      columns: ['id'],
+      columns: ['id', 'sourceUrl'],
       where: 'filePath = ?',
       whereArgs: [filePath],
       limit: 1,
     );
     if (existing.isNotEmpty) {
-      return existing.first['id'] as int;
+      final id = existing.first['id'] as int;
+      final existingSource = _normalizeOptionalUrl(
+        existing.first['sourceUrl'] as String?,
+      );
+      if (normalizedSourceUrl != null && existingSource == null) {
+        await sqlite.update(
+          'tracks',
+          {'sourceUrl': normalizedSourceUrl},
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+        await refreshTracks();
+      }
+      return id;
     }
     final resolvedTitle = (title != null && title.trim().isNotEmpty)
         ? title.trim()
@@ -71,6 +89,7 @@ class LibraryService extends ChangeNotifier {
       title: resolvedTitle,
       artist: resolvedArtist,
       filePath: filePath,
+      sourceUrl: normalizedSourceUrl,
       durationMs: 0,
       inLibrary: inLibrary,
       dateAdded: DateTime.now().toUtc().toIso8601String(),
@@ -225,6 +244,11 @@ class LibraryService extends ChangeNotifier {
     }
     await _db.deleteTrack(track.id!);
     await refreshTracks();
+  }
+
+  static String? _normalizeOptionalUrl(String? raw) {
+    final value = raw?.trim();
+    return value == null || value.isEmpty ? null : value;
   }
 
   static String _sanitizeFileName(String raw) {

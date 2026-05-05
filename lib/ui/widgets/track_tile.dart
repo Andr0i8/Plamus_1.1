@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -20,6 +21,7 @@ class TrackTile extends StatefulWidget {
 
   final TrackModel track;
   final VoidCallback onRenamed;
+
   /// Full list of tracks in the current view (for queue context).
   final List<TrackModel>? contextTracks;
 
@@ -111,6 +113,22 @@ class _TrackTileState extends State<TrackTile> {
     );
   }
 
+  Future<void> _shareTrackLink() async {
+    final url = widget.track.shareableSourceUrl;
+    if (url == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No link available for this track')),
+      );
+      return;
+    }
+    await Clipboard.setData(ClipboardData(text: url));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Link copied')),
+    );
+  }
+
   Future<void> _commitTitle() async {
     final lib = context.read<LibraryService>();
     try {
@@ -148,8 +166,8 @@ class _TrackTileState extends State<TrackTile> {
         // THIS surface (BUG 8). A tile with no contextId falls back to
         // the pre-fix behavior (matches on id regardless of surface),
         // which keeps hitherto-unmodified screens working.
-        final sameId = currentTrack?.id != null &&
-            currentTrack?.id == widget.track.id;
+        final sameId =
+            currentTrack?.id != null && currentTrack?.id == widget.track.id;
         final sameContext = widget.contextId == null ||
             audio.playbackContextId == null ||
             audio.playbackContextId == widget.contextId;
@@ -180,142 +198,160 @@ class _TrackTileState extends State<TrackTile> {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeOutCubic,
-                    margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
                     decoration: BoxDecoration(
                       color: isPlaying
                           ? accentColor.withValues(alpha: 0.12)
                           : _hover
-                              ? theme.colorScheme.primary.withValues(alpha: 0.06)
+                              ? theme.colorScheme.primary
+                                  .withValues(alpha: 0.06)
                               : Colors.transparent,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    leading: IconButton(
-                    tooltip: widget.track.isLiked ? 'Unlike' : 'Like',
-                    icon: Icon(
-                      widget.track.isLiked ? Icons.favorite : Icons.favorite_border,
-                      color: widget.track.isLiked ? theme.colorScheme.primary : null,
-                      size: 22,
-                    ),
-                    onPressed: () async {
-                      await lib.toggleLike(widget.track);
-                      widget.onRenamed();
-                    },
-                  ),
-                  title: Row(
-                    children: [
-                      Expanded(
-                        child: _editing
-                            ? TextField(
-                                controller: _titleCtrl,
-                                autofocus: true,
-                                decoration: const InputDecoration(isDense: true),
-                                onSubmitted: (_) => _commitTitle(),
-                              )
-                            : GestureDetector(
-                                onDoubleTap: () => setState(() {
-                                  _editing = true;
-                                  _titleCtrl
-                                    ..text = widget.track.title
-                                    ..selection = TextSelection(
-                                      baseOffset: 0,
-                                      extentOffset: widget.track.title.length,
-                                    );
-                                }),
-                                child: Text(
-                                  widget.track.title,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    color: isPlaying ? accentColor : null,
-                                    fontWeight: isPlaying ? FontWeight.w600 : null,
-                                  ),
-                                ),
-                              ),
-                      ),
-                      if (isPlaying && playing)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: _AnimatedMusicBars(color: accentColor),
-                        ),
-                    ],
-                  ),
-                  subtitle: Text(
-                    '${widget.track.displayArtistLabel} · ${_formatDuration(widget.track.durationMs)}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        tooltip: isPlaying
-                            ? (playing ? 'Pause' : 'Resume')
-                            : 'Play',
-                        icon: FaIcon(
-                          isPlaying && playing
-                              ? FontAwesomeIcons.pause
-                              : FontAwesomeIcons.play,
-                          size: 18,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      leading: IconButton(
+                        tooltip: widget.track.isLiked ? 'Unlike' : 'Like',
+                        icon: Icon(
+                          widget.track.isLiked
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: widget.track.isLiked
+                              ? theme.colorScheme.primary
+                              : null,
+                          size: 22,
                         ),
                         onPressed: () async {
-                          await audio.togglePlayTrack(
-                            widget.track,
-                            contextTracks,
-                            contextId: widget.contextId,
-                          );
+                          await lib.toggleLike(widget.track);
+                          widget.onRenamed();
                         },
                       ),
-                      PopupMenuButton<String>(
-                        onSelected: (value) async {
-                          try {
-                            if (value == 'playlist') {
-                              await _addToPlaylist();
-                            } else if (value == 'folder') {
-                              await lib.revealTrackInExplorer(widget.track);
-                            } else if (value == 'export') {
-                              await lib.exportTrackTo(widget.track);
-                            } else if (value == 'remove_from_playlist') {
-                              widget.onRemoveFromPlaylist?.call();
-                            } else if (value == 'delete') {
-                              await lib.deleteTrack(widget.track);
-                              widget.onRenamed();
-                            }
-                          } catch (e) {
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('$e')),
-                            );
-                          }
-                        },
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
-                            value: 'playlist',
-                            child: Text('Add to playlist…'),
+                      title: Row(
+                        children: [
+                          Expanded(
+                            child: _editing
+                                ? TextField(
+                                    controller: _titleCtrl,
+                                    autofocus: true,
+                                    decoration:
+                                        const InputDecoration(isDense: true),
+                                    onSubmitted: (_) => _commitTitle(),
+                                  )
+                                : GestureDetector(
+                                    onDoubleTap: () => setState(() {
+                                      _editing = true;
+                                      _titleCtrl
+                                        ..text = widget.track.title
+                                        ..selection = TextSelection(
+                                          baseOffset: 0,
+                                          extentOffset:
+                                              widget.track.title.length,
+                                        );
+                                    }),
+                                    child: Text(
+                                      widget.track.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style:
+                                          theme.textTheme.titleSmall?.copyWith(
+                                        color: isPlaying ? accentColor : null,
+                                        fontWeight:
+                                            isPlaying ? FontWeight.w600 : null,
+                                      ),
+                                    ),
+                                  ),
                           ),
-                          const PopupMenuItem(
-                            value: 'folder',
-                            child: Text('Show in folder'),
-                          ),
-                          const PopupMenuItem(
-                            value: 'export',
-                            child: Text('Export to…'),
-                          ),
-                          if (widget.onRemoveFromPlaylist != null)
-                            const PopupMenuItem(
-                              value: 'remove_from_playlist',
-                              child: Text('Remove from playlist'),
+                          if (isPlaying && playing)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: _AnimatedMusicBars(color: accentColor),
                             ),
-                          const PopupMenuItem(
-                            value: 'delete',
-                            child: Text('Remove from library'),
+                        ],
+                      ),
+                      subtitle: Text(
+                        '${widget.track.displayArtistLabel} · ${_formatDuration(widget.track.durationMs)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            tooltip: isPlaying
+                                ? (playing ? 'Pause' : 'Resume')
+                                : 'Play',
+                            icon: FaIcon(
+                              isPlaying && playing
+                                  ? FontAwesomeIcons.pause
+                                  : FontAwesomeIcons.play,
+                              size: 18,
+                            ),
+                            onPressed: () async {
+                              await audio.togglePlayTrack(
+                                widget.track,
+                                contextTracks,
+                                contextId: widget.contextId,
+                              );
+                            },
+                          ),
+                          PopupMenuButton<String>(
+                            onSelected: (value) async {
+                              try {
+                                if (value == 'playlist') {
+                                  await _addToPlaylist();
+                                } else if (value == 'folder') {
+                                  await lib.revealTrackInExplorer(widget.track);
+                                } else if (value == 'export') {
+                                  await lib.exportTrackTo(widget.track);
+                                } else if (value == 'share') {
+                                  await _shareTrackLink();
+                                } else if (value == 'remove_from_playlist') {
+                                  widget.onRemoveFromPlaylist?.call();
+                                } else if (value == 'delete') {
+                                  await lib.deleteTrack(widget.track);
+                                  widget.onRenamed();
+                                }
+                              } catch (e) {
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('$e')),
+                                );
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              const PopupMenuItem(
+                                value: 'playlist',
+                                child: Text('Add to playlist…'),
+                              ),
+                              const PopupMenuItem(
+                                value: 'folder',
+                                child: Text('Show in folder'),
+                              ),
+                              const PopupMenuItem(
+                                value: 'export',
+                                child: Text('Export to…'),
+                              ),
+                              if (widget.track.shareableSourceUrl != null)
+                                const PopupMenuItem(
+                                  value: 'share',
+                                  child: Text('Share'),
+                                ),
+                              if (widget.onRemoveFromPlaylist != null)
+                                const PopupMenuItem(
+                                  value: 'remove_from_playlist',
+                                  child: Text('Remove from playlist'),
+                                ),
+                              const PopupMenuItem(
+                                value: 'delete',
+                                child: Text('Remove from library'),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
                   ),
                 ),
               ),

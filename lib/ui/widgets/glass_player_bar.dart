@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../models/repeat_mode.dart';
 import '../../models/track_model.dart';
 import '../../services/audio_player_service.dart';
+import 'sleep_timer_button.dart';
 
 /// Professional bottom glass-style transport bar with SUBTLE polish.
 /// Hover: 1.05x scale, 150ms duration, NO glow effects.
@@ -75,10 +76,13 @@ class _GlassPlayerBarState extends State<GlassPlayerBar> {
                           return StreamBuilder<Duration?>(
                             stream: audio.durationStream,
                             builder: (context, durationSnapshot) {
-                              final position = positionSnapshot.data ?? Duration.zero;
-                              final duration = durationSnapshot.data ?? Duration.zero;
+                              final position =
+                                  positionSnapshot.data ?? Duration.zero;
+                              final duration =
+                                  durationSnapshot.data ?? Duration.zero;
                               final progress = duration.inMilliseconds > 0
-                                  ? position.inMilliseconds / duration.inMilliseconds
+                                  ? position.inMilliseconds /
+                                      duration.inMilliseconds
                                   : 0.0;
 
                               return Column(
@@ -89,28 +93,36 @@ class _GlassPlayerBarState extends State<GlassPlayerBar> {
                                       thumbShape: const RoundSliderThumbShape(
                                         enabledThumbRadius: 7.0,
                                       ),
-                                      overlayShape: const RoundSliderOverlayShape(
+                                      overlayShape:
+                                          const RoundSliderOverlayShape(
                                         overlayRadius: 16.0,
                                       ),
                                       activeTrackColor: primary,
-                                      inactiveTrackColor: theme.dividerColor.withValues(alpha: 0.3),
+                                      inactiveTrackColor: theme.dividerColor
+                                          .withValues(alpha: 0.3),
                                       thumbColor: primary,
-                                      overlayColor: primary.withValues(alpha: 0.2),
+                                      overlayColor:
+                                          primary.withValues(alpha: 0.2),
                                     ),
                                     child: Slider(
-                                      value: _isSeeking ? _seekPosition : progress.clamp(0.0, 1.0),
-                                      onChanged: track == null || audio.isLoading
-                                          ? null
-                                          : (value) {
-                                              setState(() {
-                                                _isSeeking = true;
-                                                _seekPosition = value;
-                                              });
-                                            },
+                                      value: _isSeeking
+                                          ? _seekPosition
+                                          : progress.clamp(0.0, 1.0),
+                                      onChanged:
+                                          track == null || audio.isLoading
+                                              ? null
+                                              : (value) {
+                                                  setState(() {
+                                                    _isSeeking = true;
+                                                    _seekPosition = value;
+                                                  });
+                                                },
                                       onChangeEnd: (value) async {
                                         if (track != null && !audio.isLoading) {
                                           final seekTo = Duration(
-                                            milliseconds: (value * duration.inMilliseconds).round(),
+                                            milliseconds: (value *
+                                                    duration.inMilliseconds)
+                                                .round(),
                                           );
                                           await audio.seek(seekTo);
                                         }
@@ -121,25 +133,31 @@ class _GlassPlayerBarState extends State<GlassPlayerBar> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           _fmt(position),
-                                          style: theme.textTheme.bodySmall?.copyWith(
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w600,
-                                            color: theme.textTheme.bodySmall?.color
+                                            color: theme
+                                                .textTheme.bodySmall?.color
                                                 ?.withValues(alpha: 0.8),
                                           ),
                                         ),
                                         Text(
                                           _fmt(duration),
-                                          style: theme.textTheme.bodySmall?.copyWith(
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w600,
-                                            color: theme.textTheme.bodySmall?.color
+                                            color: theme
+                                                .textTheme.bodySmall?.color
                                                 ?.withValues(alpha: 0.8),
                                           ),
                                         ),
@@ -174,7 +192,9 @@ class _GlassPlayerBarState extends State<GlassPlayerBar> {
                                 ),
                                 const SizedBox(height: 3),
                                 Text(
-                                  track == null ? '—' : track.displayArtistLabel,
+                                  track == null
+                                      ? '—'
+                                      : track.displayArtistLabel,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: theme.textTheme.bodySmall?.copyWith(
@@ -201,15 +221,19 @@ class _GlassPlayerBarState extends State<GlassPlayerBar> {
                                   // highlights when shuffle is active so
                                   // the user can see current state.
                                   MouseRegion(
-                                    onEnter: (_) => setState(() => _isShuffleHovered = true),
-                                    onExit: (_) => setState(() => _isShuffleHovered = false),
+                                    onEnter: (_) => setState(
+                                        () => _isShuffleHovered = true),
+                                    onExit: (_) => setState(
+                                        () => _isShuffleHovered = false),
                                     child: AnimatedScale(
                                       scale: _isShuffleHovered ? 1.05 : 1.0,
-                                      duration: const Duration(milliseconds: 150),
+                                      duration:
+                                          const Duration(milliseconds: 150),
                                       curve: Curves.easeOut,
                                       child: IconButton(
                                         iconSize: 20,
-                                        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                                        constraints: const BoxConstraints(
+                                            minWidth: 40, minHeight: 40),
                                         padding: EdgeInsets.zero,
                                         tooltip: audio.shuffleEnabled
                                             ? 'Shuffle: ON'
@@ -219,83 +243,105 @@ class _GlassPlayerBarState extends State<GlassPlayerBar> {
                                           size: 20,
                                           color: audio.shuffleEnabled
                                               ? primary
-                                              : (theme.iconTheme.color ?? Colors.white)
+                                              : (theme.iconTheme.color ??
+                                                      Colors.white)
                                                   .withValues(alpha: 0.4),
                                         ),
-                                        onPressed: track == null || audio.isLoading
-                                            ? null
-                                            : () => audio.toggleShuffle(),
+                                        onPressed:
+                                            track == null || audio.isLoading
+                                                ? null
+                                                : () => audio.toggleShuffle(),
                                       ),
                                     ),
                                   ),
                                   const SizedBox(width: 4),
                                   // Repeat button
                                   MouseRegion(
-                                    onEnter: (_) => setState(() => _isRepeatHovered = true),
-                                    onExit: (_) => setState(() => _isRepeatHovered = false),
+                                    onEnter: (_) =>
+                                        setState(() => _isRepeatHovered = true),
+                                    onExit: (_) => setState(
+                                        () => _isRepeatHovered = false),
                                     child: AnimatedScale(
                                       scale: _isRepeatHovered ? 1.05 : 1.0,
-                                      duration: const Duration(milliseconds: 150),
+                                      duration:
+                                          const Duration(milliseconds: 150),
                                       curve: Curves.easeOut,
                                       child: IconButton(
                                         iconSize: 20,
-                                        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                                        constraints: const BoxConstraints(
+                                            minWidth: 40, minHeight: 40),
                                         padding: EdgeInsets.zero,
-                                        tooltip: _repeatTooltip(audio.currentRepeatMode),
-                                        icon: _repeatModeIcon(audio.currentRepeatMode, primary, theme),
-                                        onPressed: track == null || audio.isLoading
-                                            ? null
-                                            : () => audio.cycleRepeatMode(),
+                                        tooltip: _repeatTooltip(
+                                            audio.currentRepeatMode),
+                                        icon: _repeatModeIcon(
+                                            audio.currentRepeatMode,
+                                            primary,
+                                            theme),
+                                        onPressed:
+                                            track == null || audio.isLoading
+                                                ? null
+                                                : () => audio.cycleRepeatMode(),
                                       ),
                                     ),
                                   ),
                                   const SizedBox(width: 4),
                                   // Previous button
                                   MouseRegion(
-                                    onEnter: (_) => setState(() => _isPrevHovered = true),
-                                    onExit: (_) => setState(() => _isPrevHovered = false),
+                                    onEnter: (_) =>
+                                        setState(() => _isPrevHovered = true),
+                                    onExit: (_) =>
+                                        setState(() => _isPrevHovered = false),
                                     child: AnimatedScale(
                                       scale: _isPrevHovered ? 1.05 : 1.0,
-                                      duration: const Duration(milliseconds: 150),
+                                      duration:
+                                          const Duration(milliseconds: 150),
                                       curve: Curves.easeOut,
                                       child: IconButton(
                                         iconSize: 22,
-                                        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                                        constraints: const BoxConstraints(
+                                            minWidth: 40, minHeight: 40),
                                         padding: EdgeInsets.zero,
                                         tooltip: 'Previous',
-                                        icon: const Icon(FontAwesomeIcons.backwardStep),
-                                        onPressed: track == null || audio.isLoading
-                                            ? null
-                                            : () => audio.skipPrevious(),
+                                        icon: const Icon(
+                                            FontAwesomeIcons.backwardStep),
+                                        onPressed:
+                                            track == null || audio.isLoading
+                                                ? null
+                                                : () => audio.skipPrevious(),
                                       ),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
                                   // Play/Pause button
                                   MouseRegion(
-                                    onEnter: (_) => setState(() => _isPlayHovered = true),
-                                    onExit: (_) => setState(() => _isPlayHovered = false),
+                                    onEnter: (_) =>
+                                        setState(() => _isPlayHovered = true),
+                                    onExit: (_) =>
+                                        setState(() => _isPlayHovered = false),
                                     child: AnimatedScale(
                                       scale: _isPlayHovered ? 1.05 : 1.0,
-                                      duration: const Duration(milliseconds: 150),
+                                      duration:
+                                          const Duration(milliseconds: 150),
                                       curve: Curves.easeOut,
                                       child: FilledButton(
                                         style: FilledButton.styleFrom(
                                           shape: const CircleBorder(),
                                           padding: const EdgeInsets.all(12),
                                           minimumSize: const Size(50, 50),
-                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          tapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
                                           backgroundColor: primary,
                                         ),
-                                        onPressed: track == null || audio.isLoading
-                                            ? null
-                                            : () async {
-                                                if (playing) {
-                                                  await audio.pause();
-                                                } else {
-                                                  await audio.play();
-                                                }
-                                              },
+                                        onPressed:
+                                            track == null || audio.isLoading
+                                                ? null
+                                                : () async {
+                                                    if (playing) {
+                                                      await audio.pause();
+                                                    } else {
+                                                      await audio.play();
+                                                    }
+                                                  },
                                         child: Icon(
                                           playing
                                               ? FontAwesomeIcons.pause
@@ -309,21 +355,27 @@ class _GlassPlayerBarState extends State<GlassPlayerBar> {
                                   const SizedBox(width: 8),
                                   // Next button
                                   MouseRegion(
-                                    onEnter: (_) => setState(() => _isNextHovered = true),
-                                    onExit: (_) => setState(() => _isNextHovered = false),
+                                    onEnter: (_) =>
+                                        setState(() => _isNextHovered = true),
+                                    onExit: (_) =>
+                                        setState(() => _isNextHovered = false),
                                     child: AnimatedScale(
                                       scale: _isNextHovered ? 1.05 : 1.0,
-                                      duration: const Duration(milliseconds: 150),
+                                      duration:
+                                          const Duration(milliseconds: 150),
                                       curve: Curves.easeOut,
                                       child: IconButton(
                                         iconSize: 22,
-                                        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                                        constraints: const BoxConstraints(
+                                            minWidth: 40, minHeight: 40),
                                         padding: EdgeInsets.zero,
                                         tooltip: 'Next',
-                                        icon: const Icon(FontAwesomeIcons.forwardStep),
-                                        onPressed: track == null || audio.isLoading
-                                            ? null
-                                            : () => audio.skipNext(),
+                                        icon: const Icon(
+                                            FontAwesomeIcons.forwardStep),
+                                        onPressed:
+                                            track == null || audio.isLoading
+                                                ? null
+                                                : () => audio.skipNext(),
                                       ),
                                     ),
                                   ),
@@ -331,6 +383,8 @@ class _GlassPlayerBarState extends State<GlassPlayerBar> {
                               );
                             },
                           ),
+                          const SizedBox(width: 8),
+                          const SleepTimerButton(iconSize: 20),
                           const SizedBox(width: 16),
                           // Enhanced volume control
                           Expanded(
@@ -341,7 +395,8 @@ class _GlassPlayerBarState extends State<GlassPlayerBar> {
                                 Icon(
                                   _volumeIcon(audio.volume),
                                   size: 20,
-                                  color: theme.iconTheme.color?.withValues(alpha: 0.75),
+                                  color: theme.iconTheme.color
+                                      ?.withValues(alpha: 0.75),
                                 ),
                                 const SizedBox(width: 8),
                                 SizedBox(
@@ -352,7 +407,8 @@ class _GlassPlayerBarState extends State<GlassPlayerBar> {
                                       thumbShape: const RoundSliderThumbShape(
                                         enabledThumbRadius: 6.0,
                                       ),
-                                      overlayShape: const RoundSliderOverlayShape(
+                                      overlayShape:
+                                          const RoundSliderOverlayShape(
                                         overlayRadius: 14.0,
                                       ),
                                     ),

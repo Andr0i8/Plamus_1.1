@@ -97,9 +97,8 @@ class TrackDownloadHelper {
     // roundtrip for the audio bytes themselves.
     final bin = BinaryService.instance.lastResolution;
     if (bin == null || !bin.ytDlpAvailable) {
-      final detail = bin != null
-          ? bin.errors.join(' ')
-          : 'Binary resolution did not run.';
+      final detail =
+          bin != null ? bin.errors.join(' ') : 'Binary resolution did not run.';
       throw StateError('yt-dlp is not available. $detail');
     }
 

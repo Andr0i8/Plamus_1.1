@@ -121,7 +121,8 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
     if (candidates.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('All your library tracks are already in this playlist.'),
+          content:
+              Text('All your library tracks are already in this playlist.'),
         ),
       );
       return;

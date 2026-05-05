@@ -6,7 +6,8 @@
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('placeholder — Plamus uses Provider + FFI in main()', (tester) async {
+  testWidgets('placeholder — Plamus uses Provider + FFI in main()',
+      (tester) async {
     expect(true, isTrue);
   });
 }

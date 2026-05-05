@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../models/repeat_mode.dart' as plamus;
 import '../../models/track_model.dart';
 import '../../services/audio_player_service.dart';
+import '../widgets/sleep_timer_button.dart';
 
 /// Full-screen player for mobile with complete media controls.
 class PlayerScreen extends StatelessWidget {
@@ -18,6 +19,12 @@ class PlayerScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Now Playing'),
         centerTitle: true,
+        actions: const [
+          SleepTimerButton(
+            iconSize: 24,
+            padding: EdgeInsets.symmetric(horizontal: 8),
+          ),
+        ],
       ),
       body: StreamBuilder<TrackModel?>(
         stream: audioService.currentTrackStream,
@@ -38,7 +45,7 @@ class PlayerScreen extends StatelessWidget {
                   width: 280,
                   height: 280,
                   decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.2),
+                    color: accentColor.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
@@ -65,12 +72,12 @@ class PlayerScreen extends StatelessWidget {
 
                 // Artist - REACTIVE
                 Text(
-                  track.artist ?? 'Unknown Artist',
+                  track.displayArtistLabel,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Theme.of(context)
                             .colorScheme
                             .onSurface
-                            .withOpacity(0.6),
+                            .withValues(alpha: 0.6),
                       ),
                   textAlign: TextAlign.center,
                 ),
@@ -96,23 +103,27 @@ class PlayerScreen extends StatelessWidget {
                               data: SliderTheme.of(context).copyWith(
                                 activeTrackColor: accentColor,
                                 thumbColor: accentColor,
-                                inactiveTrackColor: accentColor.withOpacity(0.3),
+                                inactiveTrackColor:
+                                    accentColor.withValues(alpha: 0.3),
                               ),
                               child: Slider(
                                 value: progress.clamp(0.0, 1.0),
                                 onChanged: (value) {
                                   final newPos = Duration(
                                     milliseconds:
-                                        (value * duration.inMilliseconds).round(),
+                                        (value * duration.inMilliseconds)
+                                            .round(),
                                   );
                                   audioService.seek(newPos);
                                 },
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(_formatDuration(position)),
                                   Text(_formatDuration(duration)),
@@ -143,7 +154,8 @@ class PlayerScreen extends StatelessWidget {
                           data: SliderTheme.of(context).copyWith(
                             activeTrackColor: accentColor,
                             thumbColor: accentColor,
-                            inactiveTrackColor: accentColor.withOpacity(0.3),
+                            inactiveTrackColor:
+                                accentColor.withValues(alpha: 0.3),
                           ),
                           child: Slider(
                             value: audioService.volume,
@@ -173,7 +185,8 @@ class PlayerScreen extends StatelessWidget {
                       width: 48,
                       height: 48,
                       child: IconButton(
-                        icon: _buildRepeatIcon(audioService.repeatMode, accentColor),
+                        icon: _buildRepeatIcon(
+                            audioService.repeatMode, accentColor),
                         iconSize: 28,
                         color: audioService.repeatMode != plamus.RepeatMode.off
                             ? accentColor

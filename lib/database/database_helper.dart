@@ -24,7 +24,9 @@ class DatabaseHelper {
   ///   * 2 — added `tracks.inLibrary INTEGER NOT NULL DEFAULT 1` so we can
   ///         add tracks directly to a playlist without surfacing them in
   ///         the main library view (`getAllTracks` now filters on this).
-  static const int _dbVersion = 2;
+  ///   * 3 — added nullable `tracks.sourceUrl` to preserve the original
+  ///         YouTube URL for sharing downloaded tracks.
+  static const int _dbVersion = 3;
 
   Database? _db;
 
@@ -62,6 +64,11 @@ class DatabaseHelper {
         'ALTER TABLE tracks ADD COLUMN inLibrary INTEGER NOT NULL DEFAULT 1',
       );
     }
+    if (oldVersion < 3) {
+      // v2 → v3: store the original YouTube URL for downloaded tracks.
+      // Nullable so existing local/imported rows remain valid.
+      await db.execute('ALTER TABLE tracks ADD COLUMN sourceUrl TEXT');
+    }
   }
 
   Future<void> _createTables(Database db, int version) async {
@@ -71,6 +78,7 @@ class DatabaseHelper {
         title TEXT NOT NULL,
         artist TEXT NOT NULL,
         filePath TEXT NOT NULL UNIQUE,
+        sourceUrl TEXT,
         durationMs INTEGER NOT NULL DEFAULT 0,
         isLiked INTEGER NOT NULL DEFAULT 0,
         inLibrary INTEGER NOT NULL DEFAULT 1,
@@ -306,8 +314,7 @@ class DatabaseHelper {
     );
     return rows.map((m) {
       final playedAt = m['playedAt'] as String? ?? '';
-      final trackMap = Map<String, Object?>.from(m)
-        ..remove('playedAt');
+      final trackMap = Map<String, Object?>.from(m)..remove('playedAt');
       return HistoryEntry(
         track: TrackModel.fromMap(trackMap),
         playedAt: playedAt,

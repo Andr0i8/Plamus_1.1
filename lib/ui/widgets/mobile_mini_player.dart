@@ -43,7 +43,10 @@ class MobileMiniPlayer extends StatelessWidget {
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               border: Border(
                 top: BorderSide(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withValues(alpha: 0.2),
                 ),
               ),
             ),

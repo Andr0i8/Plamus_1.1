@@ -48,7 +48,10 @@ class _HomeLibraryScreenState extends State<HomeLibraryScreen> {
                     children: [
                       Text(
                         'Your library',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(
                               fontWeight: FontWeight.w700,
                             ),
                       ),
@@ -61,10 +64,12 @@ class _HomeLibraryScreenState extends State<HomeLibraryScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 16),
                         ),
                         icon: const Icon(Icons.add),
-                        label: Text(_selectedSegment == 0 ? 'Import' : 'Playlist'),
+                        label:
+                            Text(_selectedSegment == 0 ? 'Import' : 'Playlist'),
                       ),
                     ],
                   ),
@@ -72,7 +77,8 @@ class _HomeLibraryScreenState extends State<HomeLibraryScreen> {
                   // Segmented control
                   Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -147,7 +153,8 @@ class _HomeLibraryScreenState extends State<HomeLibraryScreen> {
                     (context, i) {
                       final playlist = playlists[i];
                       return FutureBuilder<List<dynamic>>(
-                        future: DatabaseHelper.instance.getTracksForPlaylist(playlist.id!),
+                        future: DatabaseHelper.instance
+                            .getTracksForPlaylist(playlist.id!),
                         builder: (context, snapshot) {
                           final trackCount = snapshot.data?.length ?? 0;
                           return Card(
@@ -157,7 +164,10 @@ class _HomeLibraryScreenState extends State<HomeLibraryScreen> {
                                 width: 56,
                                 height: 56,
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Icon(
@@ -167,7 +177,8 @@ class _HomeLibraryScreenState extends State<HomeLibraryScreen> {
                               ),
                               title: Text(
                                 playlist.name,
-                                style: const TextStyle(fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600),
                               ),
                               subtitle: Text('$trackCount tracks'),
                               trailing: const Icon(Icons.chevron_right),
@@ -267,7 +278,9 @@ class _SegmentButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Text(
@@ -277,7 +290,10 @@ class _SegmentButton extends StatelessWidget {
             fontWeight: FontWeight.w600,
             color: isSelected
                 ? Theme.of(context).colorScheme.onPrimary
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                : Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.6),
           ),
         ),
       ),

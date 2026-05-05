@@ -54,7 +54,10 @@ class _LikedScreenState extends State<LikedScreen> {
                     children: [
                       Text(
                         'Liked songs',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(
                               fontWeight: FontWeight.w700,
                             ),
                       ),
@@ -72,7 +75,8 @@ class _LikedScreenState extends State<LikedScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 16),
                           ),
                           child: const Text('Play all'),
                         ),

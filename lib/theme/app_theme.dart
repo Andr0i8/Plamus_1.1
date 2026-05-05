@@ -68,7 +68,8 @@ class PlamusTheme {
         textColor: txt,
         iconColor: txt.withValues(alpha: 0.85),
       ),
-      dividerTheme: DividerThemeData(color: Colors.white.withValues(alpha: 0.08)),
+      dividerTheme:
+          DividerThemeData(color: Colors.white.withValues(alpha: 0.08)),
       sliderTheme: SliderThemeData(
         trackHeight: 4,
         activeTrackColor: accent,
@@ -81,28 +82,33 @@ class PlamusTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: accent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: accent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         ),
       ),
       dialogTheme: const DialogThemeData(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(30))),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(30))),
       ),
       cardTheme: const CardThemeData(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(30))),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(30))),
         elevation: 0,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
@@ -114,7 +120,9 @@ class PlamusTheme {
           return null;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return accent.withValues(alpha: 0.5);
+          if (states.contains(WidgetState.selected)) {
+            return accent.withValues(alpha: 0.5);
+          }
           return null;
         }),
       ),
@@ -149,7 +157,8 @@ class PlamusTheme {
         textColor: txt,
         iconColor: txt.withValues(alpha: 0.85),
       ),
-      dividerTheme: DividerThemeData(color: Colors.black.withValues(alpha: 0.06)),
+      dividerTheme:
+          DividerThemeData(color: Colors.black.withValues(alpha: 0.06)),
       sliderTheme: SliderThemeData(
         trackHeight: 4,
         activeTrackColor: accent,
@@ -162,28 +171,33 @@ class PlamusTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: accent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: accent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         ),
       ),
       dialogTheme: const DialogThemeData(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(30))),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(30))),
       ),
       cardTheme: const CardThemeData(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(30))),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(30))),
         elevation: 0,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
@@ -195,7 +209,9 @@ class PlamusTheme {
           return null;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return accent.withValues(alpha: 0.5);
+          if (states.contains(WidgetState.selected)) {
+            return accent.withValues(alpha: 0.5);
+          }
           return null;
         }),
       ),

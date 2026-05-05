@@ -178,7 +178,8 @@ class BinaryService {
   }) async {
     try {
       final data = await rootBundle.load(assetPath);
-      final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+      final bytes =
+          data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
       const minExeBytes = 4096;
       if (bytes.length < minExeBytes) {
         errors.add(

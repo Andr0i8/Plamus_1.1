@@ -105,7 +105,7 @@ class ThemeController extends ChangeNotifier {
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('accentColor', color.value & 0xFFFFFFFF);
+      await prefs.setInt('accentColor', color.toARGB32());
     } catch (e) {
       // Ignore save errors
     }
@@ -132,7 +132,7 @@ class ThemeController extends ChangeNotifier {
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('customTextColor', color.value & 0xFFFFFFFF);
+      await prefs.setInt('customTextColor', color.toARGB32());
     } catch (e) {
       // Ignore save errors
     }

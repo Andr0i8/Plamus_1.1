@@ -37,7 +37,8 @@ class PlamusShell extends StatefulWidget {
   State<PlamusShell> createState() => _PlamusShellState();
 }
 
-class _PlamusShellState extends State<PlamusShell> with SingleTickerProviderStateMixin {
+class _PlamusShellState extends State<PlamusShell>
+    with SingleTickerProviderStateMixin {
   PlamusSection _section = PlamusSection.library;
   int? _playlistId;
   bool _sidebarCollapsed = false;
@@ -95,7 +96,6 @@ class _PlamusShellState extends State<PlamusShell> with SingleTickerProviderStat
     }
   }
 
-
   /// Switches the shell body to a playlist. Used by both the sidebar tile
   /// and the home screen's "Playlists" tab so both entry points end up at
   /// the SAME [PlaylistDetailScreen] instance rendered INSIDE this shell
@@ -119,7 +119,6 @@ class _PlamusShellState extends State<PlamusShell> with SingleTickerProviderStat
 
   Future<void> _createPlaylist() async {
     final ctrl = TextEditingController(text: 'New playlist');
-    final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
     String? name;
@@ -252,9 +251,7 @@ class _PlamusShellState extends State<PlamusShell> with SingleTickerProviderStat
           // autofocused itself. Handling it here (same place as the other
           // keyboard shortcuts) makes F11 work consistently on every desktop.
           if (event.logicalKey == LogicalKeyboardKey.f11) {
-            if (Platform.isWindows ||
-                Platform.isLinux ||
-                Platform.isMacOS) {
+            if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
               _toggleFullScreen();
               return KeyEventResult.handled;
             }
@@ -265,164 +262,178 @@ class _PlamusShellState extends State<PlamusShell> with SingleTickerProviderStat
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         body: Row(
-        children: [
-          AnimatedBuilder(
-            animation: _sidebarAnimation,
-            builder: (context, child) {
-              return SizeTransition(
-                sizeFactor: _sidebarAnimation,
-                axis: Axis.horizontal,
-                axisAlignment: -1,
-                child: Container(
-                  width: 280,
-                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-                  child: Material(
-                    color: sidebarColor,
-                    borderRadius: BorderRadius.circular(30),
-                    elevation: 0,
-                    child: ListView(
-                      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 8, bottom: 8),
-                                child: Text(
-                                  'Plamus',
-                                  style: theme.textTheme.headlineMedium?.copyWith(
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 0.8,
+          children: [
+            AnimatedBuilder(
+              animation: _sidebarAnimation,
+              builder: (context, child) {
+                return SizeTransition(
+                  sizeFactor: _sidebarAnimation,
+                  axis: Axis.horizontal,
+                  axisAlignment: -1,
+                  child: Container(
+                    width: 280,
+                    margin: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                    child: Material(
+                      color: sidebarColor,
+                      borderRadius: BorderRadius.circular(30),
+                      elevation: 0,
+                      child: ListView(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 28, horizontal: 20),
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.only(left: 8, bottom: 8),
+                                  child: Text(
+                                    'Plamus',
+                                    style: theme.textTheme.headlineMedium
+                                        ?.copyWith(
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.8,
+                                    ),
                                   ),
                                 ),
                               ),
+                            ],
+                          ),
+                          const SizedBox(height: 32),
+                          _NavButton(
+                            label: 'Home',
+                            icon: FontAwesomeIcons.house,
+                            selected: _section == PlamusSection.library,
+                            onTap: () => setState(
+                                () => _section = PlamusSection.library),
+                          ),
+                          _NavButton(
+                            label: 'Search / import',
+                            icon: FontAwesomeIcons.magnifyingGlass,
+                            selected: _section == PlamusSection.importPage,
+                            onTap: () => setState(
+                                () => _section = PlamusSection.importPage),
+                          ),
+                          _NavButton(
+                            label: 'Liked songs',
+                            icon: FontAwesomeIcons.heart,
+                            selected: _section == PlamusSection.liked,
+                            onTap: () =>
+                                setState(() => _section = PlamusSection.liked),
+                          ),
+                          _NavButton(
+                            label: 'History',
+                            icon: FontAwesomeIcons.clock,
+                            selected: _section == PlamusSection.history,
+                            onTap: () => setState(
+                                () => _section = PlamusSection.history),
+                          ),
+                          const Divider(height: 40),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: FilledButton.tonalIcon(
+                              onPressed: _createPlaylist,
+                              style: FilledButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 14),
+                              ),
+                              icon:
+                                  const FaIcon(FontAwesomeIcons.plus, size: 16),
+                              label: const Text('Create playlist'),
                             ),
-                          ],
-                        ),
-                  const SizedBox(height: 32),
-                  _NavButton(
-                    label: 'Home',
-                    icon: FontAwesomeIcons.house,
-                    selected: _section == PlamusSection.library,
-                    onTap: () => setState(() => _section = PlamusSection.library),
-                  ),
-                  _NavButton(
-                    label: 'Search / import',
-                    icon: FontAwesomeIcons.magnifyingGlass,
-                    selected: _section == PlamusSection.importPage,
-                    onTap: () => setState(() => _section = PlamusSection.importPage),
-                  ),
-                  _NavButton(
-                    label: 'Liked songs',
-                    icon: FontAwesomeIcons.heart,
-                    selected: _section == PlamusSection.liked,
-                    onTap: () => setState(() => _section = PlamusSection.liked),
-                  ),
-                  _NavButton(
-                    label: 'History',
-                    icon: FontAwesomeIcons.clock,
-                    selected: _section == PlamusSection.history,
-                    onTap: () => setState(() => _section = PlamusSection.history),
-                  ),
-                  const Divider(height: 40),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: FilledButton.tonalIcon(
-                      onPressed: _createPlaylist,
-                      style: FilledButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                          ),
+                          const SizedBox(height: 24),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                left: 8, top: 8, bottom: 12),
+                            child: Text(
+                              'Playlists',
+                              style: theme.textTheme.labelLarge,
+                            ),
+                          ),
+                          ...lib.playlists.map(
+                            (p) => _PlaylistSidebarTile(
+                              playlist: p,
+                              selected: _section == PlamusSection.playlist &&
+                                  _playlistId == p.id,
+                              onOpen: () => _openPlaylist(p),
+                              onChanged: () =>
+                                  context.read<LibraryService>().refreshAll(),
+                              onDeleted: (id) {
+                                if (_playlistId == id) {
+                                  setState(() {
+                                    _section = PlamusSection.library;
+                                    _playlistId = null;
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                          const Divider(height: 24),
+                          _NavButton(
+                            label: 'Settings',
+                            icon: FontAwesomeIcons.gear,
+                            selected: _section == PlamusSection.settings,
+                            onTap: () => setState(
+                                () => _section = PlamusSection.settings),
+                          ),
+                          const SizedBox(height: 8),
+                          Consumer<ThemeController>(
+                            builder: (context, tc, _) {
+                              return ListTile(
+                                dense: true,
+                                leading: Icon(
+                                  tc.isDark
+                                      ? Icons.light_mode_outlined
+                                      : Icons.dark_mode_outlined,
+                                ),
+                                title: Text(
+                                    tc.isDark ? 'Light theme' : 'Dark theme'),
+                                onTap: tc.toggle,
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                      icon: const FaIcon(FontAwesomeIcons.plus, size: 16),
-                      label: const Text('Create playlist'),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8, top: 8, bottom: 12),
-                    child: Text(
-                      'Playlists',
-                      style: theme.textTheme.labelLarge,
-                    ),
+                );
+              },
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  // Top bar with sidebar toggle + (Linux only) drag-to-move
+                  // area and custom window controls. The drag area wraps the
+                  // empty space between the sidebar toggle and the window
+                  // controls so the user can move the frameless window by
+                  // grabbing any blank region in the top bar.
+                  _TopBar(
+                    sidebarCollapsed: _sidebarCollapsed,
+                    onToggleSidebar: _toggleSidebar,
                   ),
-                  ...lib.playlists.map(
-                    (p) => _PlaylistSidebarTile(
-                      playlist: p,
-                      selected: _section == PlamusSection.playlist &&
-                          _playlistId == p.id,
-                      onOpen: () => _openPlaylist(p),
-                      onChanged: () =>
-                          context.read<LibraryService>().refreshAll(),
-                      onDeleted: (id) {
-                        if (_playlistId == id) {
-                          setState(() {
-                            _section = PlamusSection.library;
-                            _playlistId = null;
-                          });
-                        }
-                      },
-                    ),
-                  ),
-                  const Divider(height: 24),
-                  _NavButton(
-                    label: 'Settings',
-                    icon: FontAwesomeIcons.gear,
-                    selected: _section == PlamusSection.settings,
-                    onTap: () => setState(() => _section = PlamusSection.settings),
-                  ),
-                  const SizedBox(height: 8),
-                  Consumer<ThemeController>(
-                    builder: (context, tc, _) {
-                      return ListTile(
-                        dense: true,
-                        leading: Icon(
-                          tc.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                  Expanded(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 280),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      child: KeyedSubtree(
+                        key: ValueKey<String>(
+                          '${_section.name}-${_playlistId ?? 0}',
                         ),
-                        title: Text(tc.isDark ? 'Light theme' : 'Dark theme'),
-                        onTap: tc.toggle,
-                      );
-                    },
+                        child: _buildBody(theme),
+                      ),
+                    ),
                   ),
+                  const GlassPlayerBar(),
                 ],
               ),
             ),
-          ),
-              );
-            },
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                // Top bar with sidebar toggle + (Linux only) drag-to-move
-                // area and custom window controls. The drag area wraps the
-                // empty space between the sidebar toggle and the window
-                // controls so the user can move the frameless window by
-                // grabbing any blank region in the top bar.
-                _TopBar(
-                  sidebarCollapsed: _sidebarCollapsed,
-                  onToggleSidebar: _toggleSidebar,
-                ),
-                Expanded(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 280),
-                    switchInCurve: Curves.easeOutCubic,
-                    switchOutCurve: Curves.easeInCubic,
-                    child: KeyedSubtree(
-                      key: ValueKey<String>(
-                        '${_section.name}-${_playlistId ?? 0}',
-                      ),
-                      child: _buildBody(theme),
-                    ),
-                  ),
-                ),
-                const GlassPlayerBar(),
-              ],
-            ),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }
@@ -617,7 +628,6 @@ class _PlaylistSidebarTile extends StatelessWidget {
   Future<void> _rename(BuildContext context) async {
     if (playlist.id == null) return;
     final ctrl = TextEditingController(text: playlist.name);
-    final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
     String? name;
@@ -664,14 +674,14 @@ class _PlaylistSidebarTile extends StatelessWidget {
 
   Future<void> _delete(BuildContext context) async {
     if (playlist.id == null) return;
-    final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete playlist?'),
-        content: const Text('Tracks stay in your library; only the playlist is removed.'),
+        content: const Text(
+            'Tracks stay in your library; only the playlist is removed.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -705,7 +715,8 @@ class _PlaylistSidebarTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = selected ? theme.colorScheme.primary : theme.colorScheme.onSurface;
+    final color =
+        selected ? theme.colorScheme.primary : theme.colorScheme.onSurface;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -716,7 +727,8 @@ class _PlaylistSidebarTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: ListTile(
           dense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
           leading: FaIcon(FontAwesomeIcons.listUl, size: 18, color: color),
           title: Text(
             playlist.name,
@@ -776,7 +788,8 @@ class _NavButtonState extends State<_NavButton> {
               onTap: widget.onTap,
               borderRadius: BorderRadius.circular(16),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 child: Row(
                   children: [
                     FaIcon(widget.icon, size: 18, color: color),
@@ -788,7 +801,9 @@ class _NavButtonState extends State<_NavButton> {
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: color,
-                          fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w400,
+                          fontWeight: widget.selected
+                              ? FontWeight.w600
+                              : FontWeight.w400,
                         ),
                       ),
                     ),

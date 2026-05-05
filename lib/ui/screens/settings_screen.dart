@@ -17,8 +17,7 @@ class SettingsScreen extends StatelessWidget {
     // When the user hasn't picked a custom one, fall back to the
     // automatic default for the currently active theme so the circle
     // still shows what would actually be painted across the app.
-    final effectiveTextColor =
-        themeCtrl.textColorFor(theme.brightness);
+    final effectiveTextColor = themeCtrl.textColorFor(theme.brightness);
 
     return Scaffold(
       body: CustomScrollView(
@@ -89,7 +88,8 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: TextButton.icon(
                       onPressed: () => themeCtrl.resetAccentColor(),
                       icon: const Icon(Icons.refresh),
@@ -138,7 +138,8 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: TextButton.icon(
                       onPressed: themeCtrl.resetTextColor,
                       icon: const Icon(Icons.refresh),

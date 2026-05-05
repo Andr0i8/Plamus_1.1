@@ -9,6 +9,7 @@ class TrackModel {
     required this.title,
     required this.artist,
     required this.filePath,
+    this.sourceUrl,
     required this.durationMs,
     this.isLiked = false,
     this.inLibrary = true,
@@ -36,6 +37,19 @@ class TrackModel {
   /// Absolute path to the audio file on disk (library or user folder).
   final String filePath;
 
+  /// Original YouTube URL used to download this track, when available.
+  ///
+  /// Local imports and non-YouTube direct downloads leave this null, so the
+  /// UI can hide/disable share actions for tracks that have no online source.
+  final String? sourceUrl;
+
+  /// Trimmed source URL suitable for clipboard sharing, or null when absent.
+  String? get shareableSourceUrl {
+    final value = sourceUrl?.trim();
+    if (value == null || value.isEmpty) return null;
+    return value;
+  }
+
   /// Duration in milliseconds (0 if unknown).
   final int durationMs;
 
@@ -57,6 +71,7 @@ class TrackModel {
       title: map['title'] as String? ?? 'Untitled',
       artist: map['artist'] as String? ?? 'Unknown',
       filePath: map['filePath'] as String? ?? '',
+      sourceUrl: map['sourceUrl'] as String?,
       durationMs: (map['durationMs'] as int?) ?? 0,
       isLiked: ((map['isLiked'] as int?) ?? 0) == 1,
       // Default to true so older rows inserted before the v2 migration
@@ -74,6 +89,7 @@ class TrackModel {
       'title': title,
       'artist': artist,
       'filePath': filePath,
+      'sourceUrl': sourceUrl,
       'durationMs': durationMs,
       'isLiked': isLiked ? 1 : 0,
       'inLibrary': inLibrary ? 1 : 0,
@@ -87,6 +103,7 @@ class TrackModel {
     String? title,
     String? artist,
     String? filePath,
+    String? sourceUrl,
     int? durationMs,
     bool? isLiked,
     bool? inLibrary,
@@ -97,6 +114,7 @@ class TrackModel {
       title: title ?? this.title,
       artist: artist ?? this.artist,
       filePath: filePath ?? this.filePath,
+      sourceUrl: sourceUrl ?? this.sourceUrl,
       durationMs: durationMs ?? this.durationMs,
       isLiked: isLiked ?? this.isLiked,
       inLibrary: inLibrary ?? this.inLibrary,

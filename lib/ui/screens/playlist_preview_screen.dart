@@ -268,9 +268,9 @@ class _PlaylistPreviewScreenState extends State<PlaylistPreviewScreen> {
           // own title/channel since they're already known and tend to be
           // cleaner than yt-dlp-derived filenames.
           title: result.title?.isNotEmpty == true ? result.title : track.title,
-          artist: result.artist?.isNotEmpty == true
-              ? result.artist
-              : track.channel,
+          artist:
+              result.artist?.isNotEmpty == true ? result.artist : track.channel,
+          sourceUrl: track.url,
         );
         if (plamusPlaylistId != null) {
           await lib.addTrackToPlaylist(plamusPlaylistId, trackId);
@@ -325,9 +325,7 @@ class _PlaylistPreviewScreenState extends State<PlaylistPreviewScreen> {
       appBar: AppBar(
         leading: const BackButton(),
         title: Text(
-          _info?.title.isNotEmpty == true
-              ? _info!.title
-              : widget.initialTitle,
+          _info?.title.isNotEmpty == true ? _info!.title : widget.initialTitle,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -398,8 +396,7 @@ class _PlaylistPreviewScreenState extends State<PlaylistPreviewScreen> {
               error?.toString() ?? '',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.textTheme.bodySmall?.color
-                    ?.withValues(alpha: 0.7),
+                color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 16),
@@ -446,9 +443,8 @@ class _PlaylistPreviewScreenState extends State<PlaylistPreviewScreen> {
           thumbnail: info.thumbnail.isNotEmpty
               ? info.thumbnail
               : widget.initialThumbnail,
-          trackCount: info.trackCount > 0
-              ? info.trackCount
-              : info.tracks.length,
+          trackCount:
+              info.trackCount > 0 ? info.trackCount : info.tracks.length,
           totalDurationSeconds: info.totalDurationSeconds,
         ),
         _ActionBar(
@@ -487,8 +483,7 @@ class _PlaylistPreviewScreenState extends State<PlaylistPreviewScreen> {
                   separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (context, i) {
                     final t = info.tracks[i];
-                    final status =
-                        _trackStatus[t.id] ?? _TrackStatus.pending;
+                    final status = _trackStatus[t.id] ?? _TrackStatus.pending;
                     return _TrackRow(
                       index: i + 1,
                       track: t,
@@ -796,8 +791,8 @@ class _DestinationPicker extends StatelessWidget {
       existingSubtitle = 'Pick one of your existing playlists';
     }
 
-    final showDropdown = destination == _Destination.existingPlaylist &&
-        hasExistingPlaylists;
+    final showDropdown =
+        destination == _Destination.existingPlaylist && hasExistingPlaylists;
 
     return Material(
       color: primary.withValues(alpha: 0.08),
@@ -820,8 +815,7 @@ class _DestinationPicker extends StatelessWidget {
               icon: Icons.playlist_play,
               title: 'Add to existing playlist',
               subtitle: existingSubtitle,
-              onTap: () =>
-                  onDestinationChanged(_Destination.existingPlaylist),
+              onTap: () => onDestinationChanged(_Destination.existingPlaylist),
             ),
             // Dropdown lives BELOW the option row, not as a trailing slot.
             // Avoids horizontal space fights on narrow screens (Android
@@ -1061,8 +1055,7 @@ class _TrackRow extends StatelessWidget {
           child: Text(
             '$index',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.textTheme.bodySmall?.color
-                  ?.withValues(alpha: 0.6),
+              color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.6),
             ),
           ),
         ),
@@ -1084,8 +1077,8 @@ class _TrackRow extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.textTheme.bodySmall?.color
-                      ?.withValues(alpha: 0.7),
+                  color:
+                      theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                 ),
               ),
             ),
@@ -1095,8 +1088,8 @@ class _TrackRow extends StatelessWidget {
               child: Text(
                 '\u00b7',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.textTheme.bodySmall?.color
-                      ?.withValues(alpha: 0.5),
+                  color:
+                      theme.textTheme.bodySmall?.color?.withValues(alpha: 0.5),
                 ),
               ),
             ),
@@ -1104,8 +1097,7 @@ class _TrackRow extends StatelessWidget {
             Text(
               formatShortDuration(track.durationSeconds),
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.textTheme.bodySmall?.color
-                    ?.withValues(alpha: 0.7),
+                color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
               ),
             ),
         ],

@@ -234,7 +234,15 @@ class AudioDownloadService {
 
   /// Common audio file extensions for direct-link detection.
   static const Set<String> _audioExtensions = {
-    'mp3', 'm4a', 'aac', 'ogg', 'opus', 'flac', 'wav', 'wma', 'webm',
+    'mp3',
+    'm4a',
+    'aac',
+    'ogg',
+    'opus',
+    'flac',
+    'wav',
+    'wma',
+    'webm',
   };
 
   /// Whether [url] appears to be a direct link to an audio file.
@@ -313,8 +321,7 @@ class AudioDownloadService {
 
   /// Replaces filesystem-unsafe characters for cross-platform filenames.
   static String _sanitizeForFilename(String name) {
-    final replaced =
-        name.replaceAll(RegExp(r'[\\/:*?"<>|\x00-\x1f]+'), '_');
+    final replaced = name.replaceAll(RegExp(r'[\\/:*?"<>|\x00-\x1f]+'), '_');
     final collapsed = replaced.replaceAll(RegExp(r'\s+'), ' ').trim();
     final stripped = collapsed.replaceAll(RegExp(r'^[. ]+|[. ]+$'), '');
     return stripped.isEmpty ? 'audio' : stripped;
